@@ -1,3 +1,8 @@
+
+####
+# Build environment
+####
+
 FROM ubuntu:22.04 as builder
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update -y
@@ -7,26 +12,40 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y git cmake pip
 # https://tlittenberg.github.io/ldasoft/html/md_gbmcmc_README.html#autotoc_md8
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y libgslcblas0  gsl-bin libgsl-dev libomp-dev mpi mpi-default-dev libhdf5-dev
 
-RUN git clone https://github.com/tlittenberg/ldasoft
-
 # set prefix for install directories
 ARG LDASOFT_PREFIX
 ENV LDASOFT_PREFIX=${LDASOFT_PREFIX:-/usr/local/lib/ldasoft}
 ARG MBH_HOME
 ENV MBH_HOME=${MBH_HOME:-/usr/local/lib/mbh}
 
-# build codes
-# add location of binaries to PATH 
-RUN cd ldasoft \
-  && ./install.sh ${LDASOFT_PREFIX}
-
-RUN for binFile in ${LDASOFT_PREFIX}/bin/* ; do ln -s "${binFile}" /usr/bin/ ; done
-
+####
+# MBH
+####
 RUN git clone https://github.com/eXtremeGravityInstitute/LISA-Massive-Black-Hole.git -b global-fit
 
 RUN cd LISA-Massive-Black-Hole \
   && bash -x ./install.sh ${MBH_HOME}
 
+####
+# Globalfit1
+####
+RUN git clone https://github.com/tlittenberg/ldasoft
+
+# build codes
+# add location of binaries to PATH
+# Warning single quote will make an error. Use double-quote.
+RUN cd ldasoft \
+  && sed ./globalfit/src/CMakeLists.txt -i -e "s,^#include_directories.*,include_directories(\"${MBH_HOME}/include\"),g" \
+  && sed ./globalfit/src/CMakeLists.txt -i -e "s,^#link_directories.*,link_directories(\"${MBH_HOME}/lib\"),g" \
+  && cat ./globalfit/src/CMakeLists.txt \
+  && find ${MBH_HOME}/lib \
+  && MBH_DIR="${MBH_HOME}/lib/cmake/mbh" ./install.sh ${LDASOFT_PREFIX}
+
+RUN for binFile in ${LDASOFT_PREFIX}/bin/* ; do ln -s "${binFile}" /usr/bin/ ; done
+
+####
+# Runtime image
+####
 FROM ubuntu:22.04
 
 # set prefix for install directories
