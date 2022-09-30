@@ -41,8 +41,6 @@ RUN cd ldasoft \
   && find ${MBH_HOME}/lib \
   && MBH_DIR="${MBH_HOME}/lib/cmake/mbh" ./install.sh ${LDASOFT_PREFIX}
 
-RUN for binFile in ${LDASOFT_PREFIX}/bin/* ; do ln -s "${binFile}" /usr/bin/ ; done
-
 ####
 # Runtime image
 ####
@@ -57,14 +55,17 @@ ENV MBH_HOME=${MBH_HOME:-/usr/local/lib/mbh}
 COPY --from=builder ${LDASOFT_PREFIX} ${LDASOFT_PREFIX}
 COPY --from=builder ${MBH_HOME} ${MBH_HOME}
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get update -y
+RUN for binFile in ${LDASOFT_PREFIX}/bin/* ${MBH_HOME}/bin/* ; do ln -s "${binFile}" /usr/bin/ ; done
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y tree
+# Unminimize to get man pages. Image will be bigger!
+RUN DEBIAN_FRONTEND=noninteractive apt-get update -y && yes | unminimize
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y man-db sudo tmux tree vim
 
 # Runtime lib
 # https://tlittenberg.github.io/ldasoft/html/md_gbmcmc_README.html#autotoc_md8
 # Somehow, we also need hdf5 dev package or else pip install of lisacattools will fails asking HDF5_DIR directory.
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y libgslcblas0 gsl-bin libomp5 mpi libhdf5-dev
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y libgslcblas0 gsl-bin libomp5 openmpi-common openmpi-bin libopenmpi3 libhdf5-dev
 
 # https://tlittenberg.github.io/ldasoft/html/md_gbmcmc_README.html#autotoc_md9
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y python3-numpy python3-pandas python3-astropy python3-matplotlib python3-h5py python3-tables python3-pydot
