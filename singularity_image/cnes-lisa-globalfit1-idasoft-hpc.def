@@ -1,0 +1,21 @@
+Bootstrap: docker
+From: antoinetran/cnes-lisa-globalfit1-idasoft:dev
+
+%files
+    	/softs/rh7/singularity/hpc-libs/mlx/centos7.9 /usr/src
+
+
+%post
+	echo "==============================================================================================================="
+    	echo "Install MLNX_OFED (rpm)"
+    	rpm -ivh /usr/src/centos7.9/*.rpm
+    	rm -rf /usr/src/centos7.9
+
+%environment
+
+%labels
+	Author CCCNES (Centre de Calcul du CNES)
+    	Version v1.0.0
+
+%help
+	This is a RH7.9 based container used as HAL-likes computing nodes.

@@ -60,3 +60,14 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Output globalfit files
+core*
+lisa-trana-globalfit-idasoft.*
+noise
+ucb
+vgb
+mbh
+output_monitoring 
+
+

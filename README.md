@@ -80,3 +80,12 @@ docker run --rm -ti antoinetran/cnes-lisa-globalfit1-idasoft:dev tree /usr/local
 5 directories, 10 files
 
 ```
+
+```
+qsub -W block=true -v runningMode=mpiHelloRingC,singularityFile=/work/scratch/trana/cnes-lisa-globalfit1-idasoft.sif ./run.sh
+qsub -W block=true -v runningMode=mpiHelloMpiTest,singularityFile=/work/scratch/trana/cnes-lisa-globalfit1-idasoft.sif ./run.sh
+qsub -W block=true -v runningMode=mpiGlobalFit,singularityFile=/work/scratch/trana/cnes-lisa-globalfit1-idasoft.sif,inputFile=/work/SC/lisa/LDC/LDCdata/Challenge2/LDC2_sangria_training_v2.h5,globalFitMode=blind ./run.sh
+qsub -W block=true -v runningMode=mpiGlobalFit,singularityFile=/work/scratch/trana/cnes-lisa-globalfit1-idasoft.sif,inputFile=/work/SC/lisa/LDC/LDCdata/Challenge2/LDC2_sangria_training_v2.h5,globalFitMode=verification,vgbFile=$PWD/ldc_sangria_vgb_list.dat,mbhDirectory=$PWD/ ./run.sh
+```
+
+
