@@ -122,7 +122,9 @@ void changeBuildDisplay(Map mapArgs) {
             stage ('Build') {
                 steps {
                     script {
-                        dockerImage = docker.build("${registryPrefix}cnes-lisa-globalfit1-idasoft:dev")
+                        dir("container_docker") {
+                            dockerImage = docker.build("${registryPrefix}cnes-lisa-globalfit1-idasoft:dev")
+                        }
                     }
                 }
             }

@@ -46,16 +46,9 @@ runAndCheck() {
 }
 
 # Nombre de threads OpenMP
-export OMP_NUM_THREADS=5
-# Must be a multiple of OpenMP threads.
-globalfit_chains=15
-# Defaults steps is 100000. Value of less than 10000 might be too low and causes segmentation fault..
-steps=8000
+export OMP_NUM_THREADS
 # --no-burnin
 globalfitExtraArgs="--debug"
-# Verification mode: use ucb vgb mbh files
-# Blind mode: put the value below to false.
-verificationMode=false
 
 fmin=0.0003
 samples=128
@@ -87,6 +80,8 @@ showHelp() {
   echo "--vgbFile: for runningMode=mpiGlobalFit,globalFitMode=verification only. path of the auxiliary file VGB."
   echo "--mbhDirectory: for singularityMode=mpiGlobalFit only. Path of the directory containing the auxiliary file MBH: search_sources.dat"
   echo "--ucbFile: for singularityMode=mpiGlobalFit only. WARNING: this parameter is not used. However the current directory must contain ucb_frequency_spacing.dat."
+  echo "--steps: for singularityMode=mpiGlobalFit only. Default: 100000. Number of steps (excluding burnin phase) of MCMC."
+  echo "--chains: for singularityMode=mpiGlobalFit only. Must be a multiple of OpenMP threads."
 }
 
 parseArgs() {
@@ -120,6 +115,14 @@ parseArgs() {
       mbhDirectory="$2"
       shift 2
       ;;
+    --steps)
+      steps="$2"
+      shift 2
+      ;;
+    --chains)
+      chains="$2"
+      shift 2
+      ;;
     *)
       echo "Unknown argument $1" >&2
       exit 1
@@ -139,6 +142,9 @@ pbsArgs() {
       inputFile="${inputFile}"
       vgbFile="${vgbFile}"
       mbhDirectory="${mbhDirectory}"
+      steps="${steps}"
+      OMP_NUM_THREADS="${OMP_NUM_THREADS}"
+      chains="${chains}"
 }
 
 mpiRun() {
