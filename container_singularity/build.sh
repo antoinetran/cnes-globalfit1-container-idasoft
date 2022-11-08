@@ -2,7 +2,7 @@
 
 scriptDir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 
-test ! -f "${scriptDir}"/../common.sh && echo "${scriptDir}/../common.sh not found." >&2 && exit 1 
+test ! -f "${scriptDir}"/common.sh && echo "${scriptDir}/common.sh not found." >&2 && exit 1 
 . "${scriptDir}"/common.sh
 
 #export PATH="$PATH":/softs/rh7/singularity/3.10.0/bin

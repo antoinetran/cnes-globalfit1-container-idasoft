@@ -89,13 +89,12 @@ RUN cd LISA-Massive-Black-Hole \
 # Globalfit1
 ####
 RUN git clone https://github.com/tlittenberg/ldasoft \
-  && cd ldasoft && git checkout 5aacb15befa2b2fe98619860cc8f7aff06bc81b8
+  && cd ldasoft && git checkout 26e41dc9ab83a53f823869ad2e8da6ec0d96cf18
 
 ADD ./container/ /container/
 
-## Patches to remove.
-#RUN cp /container/GalacticBinaryWrapper.c /ldasoft/globalfit/src/GalacticBinaryWrapper.c -f \
-#  && ls -al /ldasoft/globalfit/src/
+## Patches.
+RUN rsync -a /container/ldasoft/ /ldasoft/
 
 # build codes
 # add location of binaries to PATH

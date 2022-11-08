@@ -49,7 +49,9 @@ To build:
 ```
 . ~/set_proxy.sh
 outputFile=$HOME/cnes-lisa-globalfit1-idasoft-hpc.sif
-./build.sh -o "${outputFile}"
+./container_singularity/build.sh -o "${outputFile}"
+mkdir /work/SC/lisa/${USER} -p
+mv "${outputFile}" /work/SC/lisa/${USER}/cnes-lisa-globalfit1-idasoft-hpc.sif
 ```
 
 Warning: do not put output directory to the shared file-system /work. Eg: this command will not work.
@@ -123,10 +125,11 @@ docker run --rm -ti antoinetran/cnes-lisa-globalfit1-idasoft:dev tree /usr/local
 
 Prerequisites:
 * to have Sangria V2 dataset (https://lisa-ldc.lal.in2p3.fr/media/uploads/LDC2_sangria_training_v2.h5) in /work/SC/lisa/LDC/LDCdata/Challenge2/LDC2_sangria_training_v2.h5
+* to have qsub in PATH
 * to have singularity container as SIF file in
 
 ```
-sifFile=/work/SC/lisa/trana/cnes-lisa-globalfit1-idasoft.sif
+sifFile=/work/SC/lisa/${USER}/cnes-lisa-globalfit1-idasoft-hpc.sif
 ```
 
 These commands will run 2 differents HelloWorld program.
@@ -162,14 +165,31 @@ This will set Globalfit to verification mode, using auxiliary files in ./run dir
 globalFitMode=verification
 ```
 
+This will use auxiliary files for nominal profile.
+
+```
+globalFitProfile=nominal
+```
+
+This will use auxiliary files for profiling profile.
+
+```
+globalFitProfile=profiling
+```
+
+
 This will run Globalfit with OpenMPI and OpenMP using PBS.
 
 ```
-qsub -W block=true -l "${pbsRss}" -l "${walltime}" \
-  -v runningMode=mpiGlobalFit,singularityFile="${sifFile}",inputFile=/work/SC/lisa/LDC/LDCdata/Challenge2/LDC2_sangria_training_v2.h5,globalFitMode=verification,vgbFile=$PWD/ldc_sangria_vgb_list.dat,mbhDirectory=$PWD/,steps="${steps}",OMP_NUM_THREADS="${OMP_NUM_THREADS}",chains="${chains}" ./run/run_pbs.sh
+qsubVar=runningMode=mpiGlobalFit,singularityFile="${sifFile}",inputFile=/work/SC/lisa/LDC/LDCdata/Challenge2/LDC2_sangria_training_v2.h5\
+,globalFitMode=${globalFitMode},globalFitProfile=${globalFitProfile}\
+,vgbFile=$PWD/run/auxiliaryfiles/${globalFitProfile}/ldc_sangria_vgb_list.dat,mbhDirectory=$PWD/run/auxiliaryfiles/${globalFitProfile}/,ucbDirectory=$PWD/run/auxiliaryfiles/${globalFitProfile}/\
+,steps="${steps}",OMP_NUM_THREADS="${OMP_NUM_THREADS}",chains="${chains}"
+qsub -W block=true -l "${pbsRss}" -l walltime="${walltime}" -v "${qsubVar}" ./run/run_pbs.sh
 ```
 
 #### With SLURM
 
 TODO.
-See Tyson's original file ./run/run_slurm.sh.
+See Tyson's original files ./run/run_slurm_mpi_run.sh in auxiliaryfiles directory.
+
