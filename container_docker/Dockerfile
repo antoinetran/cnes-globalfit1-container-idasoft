@@ -183,6 +183,24 @@ RUN rpms="libgomp hdf5 openssh-clients" \
   && yum install ${rpms} -y \
   && for rpm in ${rpms} ; do yum install "${rpm}" -y ; done
 
+####
+# IntelMPI
+####
+
+# See https://www.intel.com/content/www/us/en/develop/documentation/installation-guide-for-intel-oneapi-toolkits-linux/top/installation/install-using-package-managers/yum-dnf-zypper.html
+RUN writeFile() { echo "$@" >>/etc/yum.repos.d/oneAPI.repo ; } \
+  && writeFile [oneAPI] \
+  && writeFile name=Intel® oneAPI repository \
+  && writeFile baseurl=https://yum.repos.intel.com/oneapi \
+  && writeFile enabled=1 \
+  && writeFile gpgcheck=1 \
+  && writeFile repo_gpgcheck=1 \
+  && writeFile gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+  && rpm --import https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+
+RUN yum install intel-oneapi-mpi-devel -y && yum clean all
+
+
 # https://tlittenberg.github.io/ldasoft/html/md_gbmcmc_README.html#autotoc_md9
 #RUN DEBIAN_FRONTEND=noninteractive apt-get install -y python3-numpy python3-pandas python3-astropy python3-matplotlib python3-h5py python3-tables python3-pydot
 #RUN DEBIAN_FRONTEND=noninteractive apt-get install -y pip && pip install chainconsumer
