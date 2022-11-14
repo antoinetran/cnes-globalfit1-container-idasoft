@@ -198,7 +198,7 @@ RUN writeFile() { echo "$@" >>/etc/yum.repos.d/oneAPI.repo ; } \
   && writeFile gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
   && rpm --import https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
 
-RUN yum install intel-oneapi-mpi-devel -y && yum clean all
+RUN pwd && yum install intel-oneapi-mpi-devel -y && yumdownloader intel-oneapi-mpi-devel && yum clean all
 
 
 # https://tlittenberg.github.io/ldasoft/html/md_gbmcmc_README.html#autotoc_md9
