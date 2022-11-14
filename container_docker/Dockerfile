@@ -50,6 +50,22 @@ ARG GSL_ROOT_DIR
 ENV GSL_ROOT_DIR=${GSL_ROOT_DIR:-/usr/local/lib/gsl}
 
 ####
+# IntelMPI
+####
+RUN writeFile() { echo "$@" >>/etc/yum.repos.d/oneAPI.repo ; } \
+  && writeFile [oneAPI] \
+  && writeFile name=Intel® oneAPI repository \
+  && writeFile baseurl=https://yum.repos.intel.com/oneapi \
+  && writeFile enabled=1 \
+  && writeFile gpgcheck=1 \
+  && writeFile repo_gpgcheck=1 \
+  && writeFile gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+  && rpm --import https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+
+RUN yum install intel-hpckit -y && yum clean all
+
+
+####
 # OpenMPI
 ####
 # Old OpenMPI because CNES cluster has old version.
