@@ -52,6 +52,8 @@ ENV GSL_ROOT_DIR=${GSL_ROOT_DIR:-/usr/local/lib/gsl}
 ####
 # IntelMPI
 ####
+
+# See https://www.intel.com/content/www/us/en/develop/documentation/installation-guide-for-intel-oneapi-toolkits-linux/top/installation/install-using-package-managers/yum-dnf-zypper.html
 RUN writeFile() { echo "$@" >>/etc/yum.repos.d/oneAPI.repo ; } \
   && writeFile [oneAPI] \
   && writeFile name=Intel® oneAPI repository \
@@ -62,7 +64,7 @@ RUN writeFile() { echo "$@" >>/etc/yum.repos.d/oneAPI.repo ; } \
   && writeFile gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
   && rpm --import https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
 
-RUN yum install intel-hpckit -y && yum clean all
+RUN yum install intel-oneapi-mpi-devel -y && yum clean all
 
 
 ####
