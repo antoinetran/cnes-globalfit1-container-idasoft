@@ -58,7 +58,7 @@ ENV DMTCP_ROOT_DIR=${GSL_ROOT_DIR:-/usr/local/lib/dmtcp}
 RUN cd /tmp \
   && git clone https://github.com/dmtcp/dmtcp.git \
   && cd dmtcp \
-  && ./configure --prefix="${DMTCP_ROOT_DIR}" && make -j \
+  && ./configure --prefix="${DMTCP_ROOT_DIR}" && make -j  && make install \
   && rm /tmp/dmtcp -rf
 
 ####
