@@ -48,23 +48,35 @@ ENV MPI_DIR=${MPI_DIR:-/usr/local/lib/omp}
 # See https://cmake.org/cmake/help/latest/module/FindGSL.html
 ARG GSL_ROOT_DIR
 ENV GSL_ROOT_DIR=${GSL_ROOT_DIR:-/usr/local/lib/gsl}
+ARG DMTCP_ROOT_DIR
+ENV DMTCP_ROOT_DIR=${GSL_ROOT_DIR:-/usr/local/lib/dmtcp}
+
+####
+# DMTCP
+####
+
+RUN cd /tmp \
+  && git clone https://github.com/dmtcp/dmtcp.git \
+  && cd dmtcp \
+  && ./configure --prefix="${DMTCP_ROOT_DIR}" && make -j \
+  && rm /tmp/dmtcp -rf
 
 ####
 # IntelMPI
 ####
 
 # See https://www.intel.com/content/www/us/en/develop/documentation/installation-guide-for-intel-oneapi-toolkits-linux/top/installation/install-using-package-managers/yum-dnf-zypper.html
-RUN writeFile() { echo "$@" >>/etc/yum.repos.d/oneAPI.repo ; } \
-  && writeFile [oneAPI] \
-  && writeFile name=Intel® oneAPI repository \
-  && writeFile baseurl=https://yum.repos.intel.com/oneapi \
-  && writeFile enabled=1 \
-  && writeFile gpgcheck=1 \
-  && writeFile repo_gpgcheck=1 \
-  && writeFile gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
-  && rpm --import https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+#RUN writeFile() { echo "$@" >>/etc/yum.repos.d/oneAPI.repo ; } \
+#  && writeFile [oneAPI] \
+#  && writeFile name=Intel® oneAPI repository \
+#  && writeFile baseurl=https://yum.repos.intel.com/oneapi \
+#  && writeFile enabled=1 \
+#  && writeFile gpgcheck=1 \
+#  && writeFile repo_gpgcheck=1 \
+#  && writeFile gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+#  && rpm --import https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
 
-RUN yum install intel-oneapi-mpi-devel -y && yum clean all
+#RUN yum install intel-oneapi-mpi-devel -y && yum clean all
 
 
 ####
@@ -145,11 +157,14 @@ ARG MPI_DIR
 ENV MPI_DIR=${MPI_DIR:-/usr/local/lib/omp}
 ARG GSL_ROOT_DIR
 ENV GSL_ROOT_DIR=${GSL_ROOT_DIR:-/usr/local/lib/gsl}
+ARG DMTCP_ROOT_DIR
+ENV DMTCP_ROOT_DIR=${GSL_ROOT_DIR:-/usr/local/lib/dmtcp}
 
 COPY --from=builder ${LDASOFT_PREFIX} ${LDASOFT_PREFIX}
 COPY --from=builder ${MBH_HOME} ${MBH_HOME}
 COPY --from=builder ${MPI_DIR} ${MPI_DIR}
 COPY --from=builder ${GSL_ROOT_DIR} ${GSL_ROOT_DIR}
+COPY --from=builder ${DMTCP_ROOT_DIR} ${DMTCP_ROOT_DIR}
 COPY --from=builder /container /container
 
 RUN for binFile in ${LDASOFT_PREFIX}/bin/* ${MBH_HOME}/bin/* ${MPI_DIR}/bin/* ; do ln -s "${binFile}" /usr/bin/ ; done
