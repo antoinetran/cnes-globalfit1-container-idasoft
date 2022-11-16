@@ -49,7 +49,7 @@ ENV MPI_DIR=${MPI_DIR:-/usr/local/lib/omp}
 ARG GSL_ROOT_DIR
 ENV GSL_ROOT_DIR=${GSL_ROOT_DIR:-/usr/local/lib/gsl}
 ARG DMTCP_ROOT_DIR
-ENV DMTCP_ROOT_DIR=${GSL_ROOT_DIR:-/usr/local/lib/dmtcp}
+ENV DMTCP_ROOT_DIR=${DMTCP_ROOT_DIR:-/usr/local/lib/dmtcp}
 
 ####
 # DMTCP
@@ -158,7 +158,7 @@ ENV MPI_DIR=${MPI_DIR:-/usr/local/lib/omp}
 ARG GSL_ROOT_DIR
 ENV GSL_ROOT_DIR=${GSL_ROOT_DIR:-/usr/local/lib/gsl}
 ARG DMTCP_ROOT_DIR
-ENV DMTCP_ROOT_DIR=${GSL_ROOT_DIR:-/usr/local/lib/dmtcp}
+ENV DMTCP_ROOT_DIR=${DMTCP_ROOT_DIR:-/usr/local/lib/dmtcp}
 
 COPY --from=builder ${LDASOFT_PREFIX} ${LDASOFT_PREFIX}
 COPY --from=builder ${MBH_HOME} ${MBH_HOME}
