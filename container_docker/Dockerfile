@@ -56,9 +56,9 @@ ENV DMTCP_ROOT_DIR=${DMTCP_ROOT_DIR:-/usr/local/lib/dmtcp}
 ####
 
 RUN cd /tmp \
-  && git clone https://github.com/dmtcp/dmtcp.git \
+  && git clone https://github.com/dmtcp/dmtcp.git -b 2.6.0 \
   && cd dmtcp \
-  && ./configure --prefix="${DMTCP_ROOT_DIR}" --enable-infiniband-support \
+  && ./configure --prefix="${DMTCP_ROOT_DIR}" \
   && make -j  && make install \
   && rm /tmp/dmtcp -rf
 
