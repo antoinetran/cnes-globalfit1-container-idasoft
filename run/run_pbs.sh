@@ -91,6 +91,7 @@ parseArgs() {
 }
 
 pbsArgs() {
+      pbsRss="${pbsRss}"
       globalFitMode="${globalFitMode}"
       runningMode="${runningMode}"
       singularityFile="${singularityFile}"
@@ -100,8 +101,15 @@ pbsArgs() {
       #ucbDirectory="${ucbDirectory}"
       globalFitProfile="${globalFitProfile}"
       steps="${steps}"
-      OMP_NUM_THREADS="${OMP_NUM_THREADS}"
+      ompNumThreads="${ompNumThreads}"
       chains="${chains}"
+      logInfo "pbsRss: ${pbsRss}"
+      export OMP_NUM_THREADS="${ompNumThreads}"
+      logInfo "OMP_NUM_THREADS: ${OMP_NUM_THREADS}"
+      logInfo "chains: ${chains}"
+      logInfo "steps: ${steps}"
+      logInfo "globalFitMode: ${globalFitMode}"
+      logInfo "globalfitExtraArgs: ${globalfitExtraArgs}"
 }
 
 mpiRun() {
@@ -113,14 +121,22 @@ mpiRun() {
   # nombre de processus MPI
   nb_procs=$(wc -l $PBS_NODEFILE | cut -d" " -f 1)
   echo "nb_procs = $nb_procs"
-  mpirun -x OMP_NUM_THREADS -n "${nb_procs}" --hostfile "${PBS_NODEFILE}" --mca orte_base_help_aggregate 0 "$@"
+  echo PBS_NODEFILE
+  cat $PBS_NODEFILE
+  printAndRun mpirun -x OMP_NUM_THREADS -n "${nb_procs}" --hostfile "${PBS_NODEFILE}" --mca orte_base_help_aggregate 0 "$@"
+  #printAndRun /work/SC/lisa/trana/dmtcp/bin/dmtcp_launch --rm -i 30 --no-gzip --ckptdir /work/SC/lisa/trana/dmtcpckpt/ --coord-logfile /work/SC/lisa/trana/dmtcp.log  mpirun --mca btl self,tcp -x OMP_NUM_THREADS -n "${nb_procs}" --hostfile "${PBS_NODEFILE}" --mca orte_base_help_aggregate 0 "$@"
+  #cd /work/SC/lisa/trana/dmtcpckpt/
+  #export DMTCP_COORD_HOST=$(hostname -f)
+  #echo "DMTCP_COORD_HOST = $DMTCP_COORD_HOST"
+  #printAndRun bash -x ./dmtcp_restart_script.sh --coord-host "${DMTCP_COORD_HOST}" --hostfile $PBS_NODEFILE --coord-logfile /work/SC/lisa/trana/dmtcp_restore.log --tmpdir "$TMPDIR"
 }
 
 helloworldMpiTest() {
-  printAndRun mpiRun singularity exec "${singularityFile}" /container/mpitest
+  mpiRun singularity exec "${singularityFile}" /container/mpitest
 }
 helloworldRingC() {
-  printAndRun mpiRun singularity exec "${singularityFile}" /container/ring_c
+  #mpiRun singularity exec "${singularityFile}" /container/ring_c
+  mpiRun /work/SC/lisa/trana/cnes-globalfit1-container-idasoft/container/ring_c
 }
 
 printAndRun() {
@@ -169,9 +185,31 @@ setGlobalFitVars() {
 
 globalfit() {
   setGlobalFitVars
-  printAndRun mpiRun \
+
+#export LDASOFT_PREFIX=${LDASOFT_PREFIX:-/work/SC/lisa/trana/lib/ldasoft}
+#export MBH_HOME=${MBH_HOME:-/work/SC/lisa/trana/lib/mbh}
+#export MPI_DIR=${MPI_DIR:-/work/SC/lisa/trana/lib/omp}
+#export GSL_ROOT_DIR=${GSL_ROOT_DIR:-/work/SC/lisa/trana/lib/gsl}
+#PATH=$PATH:$MPI_DIR/bin
+#export LD_LIBRARY_PATH="$GSL_ROOT_DIR"/lib
+# mpiRun /work/SC/lisa/trana/lib/ldasoft/bin/global_fit \
+#     --rundir "${outputDir}" \
+#     --h5-data "${inputFile}" --sangria \
+#     --chains "${chains}" \
+#     ${fminArg} \
+#     ${TstartArg} \
+#     --duration "${Tobs}" \
+#     ${samplesArg} \
+#     --padding "${padding}" \
+#     --sources "${sources}" \
+#     ${verificationModeCmdArg} \
+#     "$@"
+# return
+
+
+  mpiRun \
     singularity exec \
-    --workdir "${workDir}" --bind "${inputFile}":/data/input ${verificationModeSingularityArg} \
+    --workdir "${workDir}" --bind "${workDir}":"${workDir}" --bind "${inputFile}":/data/input ${verificationModeSingularityArg} \
     "${singularityFile}" /usr/local/lib/ldasoft/bin/global_fit \
       --rundir "${outputDir}" \
       --h5-data "/data/input" --sangria \

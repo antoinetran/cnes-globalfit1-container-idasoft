@@ -8,12 +8,12 @@ steps=100000
 # select=Number of node
 # ncpus=Number of Cpus per node for all processes
 # mpiprocs=Number of Cpus per node allocated for MPI.
-pbsRss="select=4:ncpus=40:mpiprocs=5:mem=100gb:os=rh7:generation=g2019"
+pbsRss="select=5:ncpus=40:mpiprocs=8:mem=50gb:os=rh7:generation=g2019"
 # Number of OpenMP threads. The higher the lesser for walltime (better).
-OMP_NUM_THREADS=8
+OMP_NUM_THREADS=5
 # Number of chains for tempering movement. Must be a multiple of OpenMP threads.
-chains=16
-walltime=01:00:00
+chains=15
+walltime=72:00:00
 
 globalFitMode=verification
 globalFitProfile=profiling
