@@ -60,11 +60,11 @@ loadModules() {
 showHelp() {
   echo "-h|--help: show help"
   echo "The rest of arguments is provided by PBS run in pbsArgs(). Description of variables below."
-  echo "globalFitMode: mode. Accept: verification or blind"
+  echo "globalFitMode: mode. Accept: full or simple"
   echo "runningMode: running mode. Accept: mpiGlobalFit, mpiHelloRingC, mpiHelloMpiTest"
   echo "singularityFile: singularity SIF file."
   echo "inputFile: for singularityMode=mpiGlobalFit only. Path of the input file. It must be in Sangria V2 format."
-  echo "vgbFile: for runningMode=mpiGlobalFit,globalFitMode=verification only. path of the auxiliary file VGB."
+  echo "vgbFile: for runningMode=mpiGlobalFit,globalFitMode=full only. path of the auxiliary file VGB."
   echo "mbhDirectory: for singularityMode=mpiGlobalFit only. Path of the directory containing the auxiliary file MBH: search_sources.dat"
   echo "ucbDirectory: for singularityMode=mpiGlobalFit only. Path of the directory containing the auxiliary file ucb_frequency_spacing.dat."
   echo "steps: for singularityMode=mpiGlobalFit only. Default: 100000. Number of steps (excluding burnin phase) of MCMC."
@@ -91,6 +91,7 @@ parseArgs() {
 }
 
 pbsArgs() {
+      pbsRss="${pbsRss}"
       globalFitMode="${globalFitMode}"
       runningMode="${runningMode}"
       singularityFile="${singularityFile}"
@@ -100,8 +101,15 @@ pbsArgs() {
       #ucbDirectory="${ucbDirectory}"
       globalFitProfile="${globalFitProfile}"
       steps="${steps}"
-      OMP_NUM_THREADS="${OMP_NUM_THREADS}"
+      ompNumThreads="${ompNumThreads}"
       chains="${chains}"
+      logInfo "pbsRss: ${pbsRss}"
+      export OMP_NUM_THREADS="${ompNumThreads}"
+      logInfo "OMP_NUM_THREADS: ${OMP_NUM_THREADS}"
+      logInfo "chains: ${chains}"
+      logInfo "steps: ${steps}"
+      logInfo "globalFitMode: ${globalFitMode}"
+      logInfo "globalfitExtraArgs: ${globalfitExtraArgs}"
 }
 
 mpiRun() {
@@ -113,14 +121,22 @@ mpiRun() {
   # nombre de processus MPI
   nb_procs=$(wc -l $PBS_NODEFILE | cut -d" " -f 1)
   echo "nb_procs = $nb_procs"
-  mpirun -x OMP_NUM_THREADS -n "${nb_procs}" --hostfile "${PBS_NODEFILE}" --mca orte_base_help_aggregate 0 "$@"
+  echo PBS_NODEFILE
+  cat $PBS_NODEFILE
+  printAndRun mpirun -x OMP_NUM_THREADS -n "${nb_procs}" --hostfile "${PBS_NODEFILE}" --mca orte_base_help_aggregate 0 "$@"
+  #printAndRun /work/SC/lisa/trana/dmtcp/bin/dmtcp_launch --rm -i 30 --no-gzip --ckptdir /work/SC/lisa/trana/dmtcpckpt/ --coord-logfile /work/SC/lisa/trana/dmtcp.log  mpirun --mca btl self,tcp -x OMP_NUM_THREADS -n "${nb_procs}" --hostfile "${PBS_NODEFILE}" --mca orte_base_help_aggregate 0 "$@"
+  #cd /work/SC/lisa/trana/dmtcpckpt/
+  #export DMTCP_COORD_HOST=$(hostname -f)
+  #echo "DMTCP_COORD_HOST = $DMTCP_COORD_HOST"
+  #printAndRun bash -x ./dmtcp_restart_script.sh --coord-host "${DMTCP_COORD_HOST}" --hostfile $PBS_NODEFILE --coord-logfile /work/SC/lisa/trana/dmtcp_restore.log --tmpdir "$TMPDIR"
 }
 
 helloworldMpiTest() {
-  printAndRun mpiRun singularity exec "${singularityFile}" /container/mpitest
+  mpiRun singularity exec "${singularityFile}" /container/mpitest
 }
 helloworldRingC() {
-  printAndRun mpiRun singularity exec "${singularityFile}" /container/ring_c
+  #mpiRun singularity exec "${singularityFile}" /container/ring_c
+  mpiRun /work/SC/lisa/trana/cnes-globalfit1-container-idasoft/container/ring_c
 }
 
 printAndRun() {
@@ -131,15 +147,15 @@ printAndRun() {
 setGlobalFitVars() {
   outputDir="${PBS_O_WORKDIR}"
   workDir="${PBS_O_WORKDIR}"
-  if test "verification" == "${globalFitMode}" ; then
-    # In verification mode, the ucb ucb_frequency_spacing.dat must be on working directory. Thus we set pwd.
-    verificationModeSingularityArg="--pwd /data/ucb --bind ${vgbFile}:/data/vgb --bind ${mbhDirectory}:/data/mbh --bind ${ucbDirectory}:/data/ucb"
-    verificationModeCmdArg="--known-sources /data/vgb --mbh-search-path /data/mbh"
+  if test "full" == "${globalFitMode}" ; then
+    # In full mode, the ucb ucb_frequency_spacing.dat must be on working directory. Thus we set pwd.
+    fullModeSingularityArg="--pwd /data/ucb --bind ${vgbFile}:/data/vgb --bind ${mbhDirectory}:/data/mbh --bind ${ucbDirectory}:/data/ucb"
+    fullModeCmdArg="--known-sources /data/vgb --mbh-search-path /data/mbh"
     logInfo "Verification mode found."
   else
-    verificationModeSingularityArg=""
-    verificationModeCmdArg=""
-    logInfo "globalFitMode ${globalFitMode} is not set to verification mode."
+    fullModeSingularityArg=""
+    fullModeCmdArg=""
+    logInfo "globalFitMode ${globalFitMode} is not set to full mode."
   fi
   vgbFile=$PWD/run/auxiliaryfiles/${globalFitProfile}/ldc_sangria_vgb_list.dat,mbhDirectory=$PWD/run/auxiliaryfiles/${globalFitProfile}/,ucbDirectory=$PWD/run/auxiliaryfiles/${globalFitProfile}
 
@@ -169,9 +185,31 @@ setGlobalFitVars() {
 
 globalfit() {
   setGlobalFitVars
-  printAndRun mpiRun \
+
+#export LDASOFT_PREFIX=${LDASOFT_PREFIX:-/work/SC/lisa/trana/lib/ldasoft}
+#export MBH_HOME=${MBH_HOME:-/work/SC/lisa/trana/lib/mbh}
+#export MPI_DIR=${MPI_DIR:-/work/SC/lisa/trana/lib/omp}
+#export GSL_ROOT_DIR=${GSL_ROOT_DIR:-/work/SC/lisa/trana/lib/gsl}
+#PATH=$PATH:$MPI_DIR/bin
+#export LD_LIBRARY_PATH="$GSL_ROOT_DIR"/lib
+# mpiRun /work/SC/lisa/trana/lib/ldasoft/bin/global_fit \
+#     --rundir "${outputDir}" \
+#     --h5-data "${inputFile}" --sangria \
+#     --chains "${chains}" \
+#     ${fminArg} \
+#     ${TstartArg} \
+#     --duration "${Tobs}" \
+#     ${samplesArg} \
+#     --padding "${padding}" \
+#     --sources "${sources}" \
+#     ${fullModeCmdArg} \
+#     "$@"
+# return
+
+
+  mpiRun \
     singularity exec \
-    --workdir "${workDir}" --bind "${inputFile}":/data/input ${verificationModeSingularityArg} \
+    --workdir "${workDir}" --bind "${workDir}":"${workDir}" --bind "${inputFile}":/data/input ${fullModeSingularityArg} \
     "${singularityFile}" /usr/local/lib/ldasoft/bin/global_fit \
       --rundir "${outputDir}" \
       --h5-data "/data/input" --sangria \
@@ -182,7 +220,7 @@ globalfit() {
       ${samplesArg} \
       --padding "${padding}" \
       --sources "${sources}" \
-      ${verificationModeCmdArg} \
+      ${fullModeCmdArg} \
       "$@"
 }
 

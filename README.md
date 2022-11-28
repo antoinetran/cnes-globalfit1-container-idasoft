@@ -153,16 +153,16 @@ chains=15
 walltime=01:00:00
 ```
 
-This will set Globalfit to blind mode.
+This will set Globalfit to simple mode: noise + UCB enabled. MBH + VGB disabled.
 
 ```
-globalFitMode=blind
+globalFitMode=simple
 ```
 
-This will set Globalfit to verification mode, using auxiliary files in ./run directory.
+This will set Globalfit to full mode: noise + UCB + MBH + VGB enabled, using auxiliary files in ./run directory.
 
 ```
-globalFitMode=verification
+globalFitMode=full
 ```
 
 This will use auxiliary files for nominal profile.
