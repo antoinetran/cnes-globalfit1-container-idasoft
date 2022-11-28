@@ -53,7 +53,8 @@ globalfitExtraArgs="--debug"
 
 loadModules() {
   module load singularity/3.10.0
-  module load openmpi/3.1.4 #(version doit être la même que celle utilisée dans le conteneur pour compiler)
+  #module load openmpi/3.1.4 #(version doit être la même que celle utilisée dans le conteneur pour compiler)
+  export PATH="$PATH":~/mpi/bin
   module load monitoring/2.0
 }
 
@@ -123,7 +124,10 @@ mpiRun() {
   echo "nb_procs = $nb_procs"
   echo PBS_NODEFILE
   cat $PBS_NODEFILE
-  printAndRun mpirun -x OMP_NUM_THREADS -n "${nb_procs}" --hostfile "${PBS_NODEFILE}" --mca orte_base_help_aggregate 0 "$@"
+  #printAndRun mpirun -x OMP_NUM_THREADS -n "${nb_procs}" --hostfile "${PBS_NODEFILE}" --mca orte_base_help_aggregate 0 "$@"
+  #printAndRun mpirun -n "${nb_procs}" --hostfile "${PBS_NODEFILE}" "$@"
+  printAndRun ~/mana/bin/mana_coordinator
+  printAndRun mpirun -n "${nb_procs}" --hostfile "${PBS_NODEFILE}" "$@"
   #printAndRun /work/SC/lisa/trana/dmtcp/bin/dmtcp_launch --rm -i 30 --no-gzip --ckptdir /work/SC/lisa/trana/dmtcpckpt/ --coord-logfile /work/SC/lisa/trana/dmtcp.log  mpirun --mca btl self,tcp -x OMP_NUM_THREADS -n "${nb_procs}" --hostfile "${PBS_NODEFILE}" --mca orte_base_help_aggregate 0 "$@"
   #cd /work/SC/lisa/trana/dmtcpckpt/
   #export DMTCP_COORD_HOST=$(hostname -f)
@@ -135,8 +139,15 @@ helloworldMpiTest() {
   mpiRun singularity exec "${singularityFile}" /container/mpitest
 }
 helloworldRingC() {
-  #mpiRun singularity exec "${singularityFile}" /container/ring_c
-  mpiRun /work/SC/lisa/trana/cnes-globalfit1-container-idasoft/container/ring_c
+  cd /work/SC/lisa/trana/dmtcpckpt/
+  export DMTCP_COORD_HOST=$(hostname -f)
+  echo "DMTCP_COORD_HOST = $DMTCP_COORD_HOST"
+  #printAndRun bash -x ./dmtcp_restart_script.sh --coord-host "${DMTCP_COORD_HOST}" --hostfile $PBS_NODEFILE --coord-logfile /work/SC/lisa/trana/dmtcp_restore.log --tmpdir "$TMPDIR"
+  #printAndRun /work/SC/lisa/trana/dmtcp/bin/dmtcp_launch --rm -i 30 --no-gzip --ckptdir /work/SC/lisa/trana/dmtcpckpt/ --coord-logfile /work/SC/lisa/trana/dmtcp.log mpiRun singularity exec "${singularityFile}" /container/ring_c
+  #printAndRun /work/SC/lisa/trana/dmtcp/bin/dmtcp_launch -i 30 --no-gzip --ckptdir /work/SC/lisa/trana/dmtcpckpt/ --coord-logfile /work/SC/lisa/trana/dmtcp.log mpiRun /work/SC/lisa/trana/cnes-globalfit1-container-idasoft/container/ring_c
+  #printAndRun /work/SC/lisa/trana/dmtcp/bin/dmtcp_launch --no-gzip --ckptdir /work/SC/lisa/trana/dmtcpckpt/ --coord-logfile /work/SC/lisa/trana/dmtcp.log mpiRun /work/SC/lisa/trana/container/ring_c
+  #printAndRun mpiRun ~/mana/bin/mana_launch singularity exec "${singularityFile}" /container/ring_c
+  printAndRun mpiRun ~/mana/bin/mana_launch /work/SC/lisa/trana/container/ring_c
 }
 
 printAndRun() {
