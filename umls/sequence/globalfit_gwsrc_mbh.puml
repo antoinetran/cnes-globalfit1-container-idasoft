@@ -1,0 +1,43 @@
+@startuml
+title MBH diagram ; 2 <= mpid < 2 + N_MBH
+
+|#wheat|GlobalFit.c|
+start
+  :// Forked from MPI_Init();
+
+  |#wheat|MBHWrapper.c|
+  :// search_sources.dat found
+  // get N_MBH = number of line
+  parse_mbh_args();
+
+|#wheat|GlobalFit.c|
+  :alloc_noise_data()
+  alloc_vbmcmc_data()
+  alloc_mbh_data();
+
+  repeat
+    :// Remove from TDI AET all found signals from last iteration of UCB VGB MBH
+    create_residual();
+
+    |#AliceBlue|MBHWrapper.c|
+    :select_mbh_segment();
+
+    :// Keep only noise from related frequencies band
+    select_mbh_noise();
+
+    :// cycle = round ( the max time of all VGB MBH UCB process time) / ( time of one update_gbmcmc_sampler() time );
+
+    while (Loop until done 'cycle' time)
+      :// MCMC
+      update_mbh_sampler();
+    endwhile
+
+  |#wheat|GlobalFit.c|
+  :// Sends TDI AE from MBH to root process, then from root to all processes (including MBH).
+  share_mbh_model();
+
+  repeat while (GBMCMC steps finished?) is (no)
+  ->yes;
+
+stop
+@enduml

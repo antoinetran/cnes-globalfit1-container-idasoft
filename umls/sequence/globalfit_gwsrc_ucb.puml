@@ -1,0 +1,62 @@
+@startuml
+title UCB diagram ; 2 + N_MBH <= mpid < 2 + N_MBH + N_UCB
+
+|#wheat|GlobalFit.c|
+start
+  :// Forked from MPI_Init();
+
+  :alloc_noise_data()
+  alloc_vbmcmc_data()
+  alloc_mbh_data();
+
+  repeat
+    :// Remove from TDI AE all found signals from last iteration of UCB VGB MBH
+    create_residual();
+
+    |#AliceBlue|GalacticBinaryWrapper.c|
+    group setup_frequency_segment();
+
+    if (ucb_frequency_spacing.dat found?) then (found)
+      :mpidUcb1 fmin_1 fmax_1
+      mpidUcb2 fmin_2 fmax_2
+      mpidUcb3 fmin_3 fmax_3
+      ...
+      mpidUcbN_UCB fmin_N_UCB fmax_N_UCB ;
+    else (not found)
+      :?;
+    endif
+    end group
+
+    |#wheat|NoiseWrapper.c|
+    :// Keep only noise from related frequencies band
+    select_noise_segment();
+
+    |#AliceBlue|GalacticBinaryWrapper.c|
+
+
+  |#AliceBlue|GalacticBinaryWrapper.c|
+  :// cycle = round ( the max time of all VGB MBH UCB process time) / ( time of one update_gbmcmc_sampler() time );
+
+  :exchange_gbmcmc_source_params();
+  if (mpid?) then (even)
+    while (Loop until done 'cycle' time)
+      :// MCMC
+      update_gbmcmc_sampler();
+    endwhile
+    :exchange_gbmcmc_source_params();
+  else (odd)
+    :exchange_gbmcmc_source_params();
+    while (Loop until done 'cycle' time)
+      :// MCMC
+      update_gbmcmc_sampler();
+    endwhile
+  endif
+  
+  |#wheat|GlobalFit.c|
+  :// Sends TDI AE from UCB to root process, then from root to all non-UCB processes.
+  share_gbmcmc_model();
+
+  repeat while (GBMCMC steps finished?) is (no)
+  ->yes;
+stop
+@enduml

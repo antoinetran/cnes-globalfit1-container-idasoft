@@ -1,0 +1,41 @@
+@startuml
+title UCB diagram ; 2 + N_MBH <= mpid < 2 + N_MBH + N_UCB
+
+|#wheat|GlobalFit.c|
+start
+  :// Forked from MPI_Init();
+
+  :alloc_noise_data()
+  alloc_vbmcmc_data()
+  alloc_mbh_data();
+
+  repeat
+    :// Remove from TDI AE all found signals from last iteration of UCB VGB MBH
+    create_residual();
+
+    |#AliceBlue|VerificationBinaryWrapper.c|
+    :select_vbmcmc_segments();
+
+    |#AliceBlue|GalacticBinaryWrapper.c|
+    :// This is not the same function as for UCB. For VGB only.
+    setup_frequency_segment();
+
+    |#wheat|NoiseWrapper.c|
+    while (Loop over number of known VGB)
+      :// Keep only noise from related frequencies band
+      select_noise_segment();
+    endwhile
+
+    |#AliceBlue|VerificationBinaryWrapper.c|
+    :// MCMC
+    update_vbmcmc_sampler();
+
+  |#wheat|GlobalFit.c|
+  :// Sends TDI AE from UCB to root process, then from root to all non-UCB processes.
+  share_vbmcmc_model();
+
+  repeat while (GBMCMC steps finished?) is (no)
+  ->yes;
+stop
+@enduml
+

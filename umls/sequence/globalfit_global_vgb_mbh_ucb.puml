@@ -1,0 +1,24 @@
+@startuml
+title Case with MBH (search_sources.dat provided) and VGB (ldc_sangria_vgb_list.dat provided)
+
+start
+:main();
+
+switch (MPI_Init())
+case ( noise; mpid = 0 )
+  :// See Noise diagram;
+
+case ( vgb; mpid = 1 )
+  :// See VGB diagram;
+
+case ( mbh; 2 <= mpid < 2 + N_MBH )
+  :// See MBH diagram;
+
+case ( ucb; 2 + N_MBH <= mpid < 2 + N_MBH + N_UCB ; )
+  :// See UCB diagram;
+
+endswitch
+
+stop
+@enduml
+
