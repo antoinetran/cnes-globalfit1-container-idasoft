@@ -15,7 +15,7 @@ OMP_NUM_THREADS=5
 chains=15
 walltime=72:00:00
 
-globalFitMode=verification
+globalFitMode=full
 globalFitProfile=profiling
 
 qsubVar=runningMode=mpiGlobalFit,singularityFile="${sifFile}",inputFile=/work/SC/lisa/LDC/LDCdata/Challenge2/LDC2_sangria_training_v2.h5\

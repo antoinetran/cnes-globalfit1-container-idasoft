@@ -13,9 +13,9 @@ pbsRss="select=1:ncpus=40:mpiprocs=8:mem=50gb:os=rh7:generation=g2019"
 ompNumThreads=5
 # Number of chains for tempering movement. Must be a multiple of OpenMP threads.
 chains=15
-walltime=01:00:00
+walltime=00:30:00
 
-globalFitMode=verification
+globalFitMode=full
 globalFitProfile=nominal
 
 qsubVar=pbsRss="${pbsRss}",runningMode=mpiGlobalFit,singularityFile="${sifFile}",inputFile=/work/SC/lisa/LDC/LDCdata/Challenge2/LDC2_sangria_training_v2.h5\
