@@ -1,6 +1,6 @@
 # Project LISA for CNES.
 
-This repository builds the globalfit1 Idasoft (https://github.com/tlittenberg/ldasoft) and deploys it as a docker container to https://hub.docker.com/r/antoinetran/cnes-lisa-globalfit1-idasoft.
+This repository builds the globalfit1 Idasoft (https://github.com/tlittenberg/ldasoft) and deploys it as a docker container to https://hub.docker.com/r/antoinetran/cnes-lisa-globalfit1-idasoft. Official doc of globalfit1 Idasoft: https://tlittenberg.github.io/ldasoft/html/index.html .
 
 ## How to build docker container
 
@@ -192,4 +192,112 @@ qsub -W block=true -l "${pbsRss}" -l walltime="${walltime}" -v "${qsubVar}" ./ru
 
 TODO.
 See Tyson's original files ./run/run_slurm_mpi_run.sh in auxiliaryfiles directory.
+
+## Output
+
+### Output structure
+
+If successful, the output structure should be (when launched with `globalFitMode=full`):
+
+```
+├── mbh
+│   └── src0000
+│       ├── chain.dat
+│       ├── data_0.dat.temp
+│       └── power_data_0.dat.temp
+├── noise
+│   ├── chains
+│   │   ├── log_likelihood_chain.dat
+│   │   ├── model_chain.dat.0
+│   │   ├── noise_chain.dat.0
+│   │   ├── parameter_chain.dat.0
+│   │   └── temperature_chain.dat
+│   ├── checkpoint
+│   └── data
+│       ├── current_interpolated_spline_points.dat
+│       ├── current_spline_points.dat
+│       ├── data_0.dat
+│       ├── final_interpolated_spline_points.dat
+│       ├── final_spline_points.dat
+│       ├── initial_spline_points.dat
+│       ├── interpolated_spline_points.dat
+│       ├── power_data_0.dat
+│       ├── power_injection_0.dat
+│       ├── power_noise_0.dat
+│       ├── power_noise_t0.dat
+│       └── waveform_injection_0.dat
+├── output.txt
+├── ucb
+│   ├── seg_0000
+│   │   ├── chains
+│   │   │   ├── dimension_chain.dat.1
+│   │   │   ├── dimension_chain.dat.2
+│   │   │   ├── dimension_chain.dat.3
+│   │   │   ├── dimension_chain.dat.4
+│   │   │   ├── dimension_chain.dat.5
+│   │   │   ├── dimension_chain.dat.6
+│   │   │   ├── dimension_chain.dat.7
+│   │   │   ├── dimension_chain.dat.8
+│   │   │   ├── dimension_chain.dat.9
+│   │   │   ├── model_chain.dat.0
+│   │   │   ├── noise_chain.dat.0
+│   │   │   └── parameter_chain.dat.0
+│   │   ├── checkpoint
+│   │   │   ├── chain_state_0.dat
+│   │   │   ├── chain_state_10.dat
+│   │   │   ├── chain_state_11.dat
+│   │   │   ├── chain_state_12.dat
+│   │   │   ├── chain_state_13.dat
+│   │   │   ├── chain_state_14.dat
+│   │   │   ├── chain_state_1.dat
+│   │   │   ├── chain_state_2.dat
+│   │   │   ├── chain_state_3.dat
+│   │   │   ├── chain_state_4.dat
+│   │   │   ├── chain_state_5.dat
+│   │   │   ├── chain_state_6.dat
+│   │   │   ├── chain_state_7.dat
+│   │   │   ├── chain_state_8.dat
+│   │   │   ├── chain_state_9.dat
+│   │   │   └── fstat_prop.bin
+│   │   ├── data
+│   │   │   ├── data_0.dat
+│   │   │   ├── power_data_0.dat
+│   │   │   ├── power_injection_0.dat
+│   │   │   ├── power_noise_0.dat
+│   │   │   ├── power_reconstruction_t0.dat
+│   │   │   ├── power_residual_t0.dat
+│   │   │   ├── variance_residual_t0.dat
+│   │   │   └── waveform_injection_0.dat
+│   │   ├── evidence.dat
+│   │   └── example_gb_catalog.sh
+│   ├── seg_0001
+...
+└── vgb
+    ├── example_gb_catalog.sh
+    ├── seg_0000
+    │   ├── chains
+    │   │   ├── dimension_chain.dat.1
+    │   │   ├── model_chain.dat.0
+    │   │   ├── noise_chain.dat.0
+    │   │   └── parameter_chain.dat.0
+    │   ├── checkpoint
+    │   └── data
+    │       ├── data_0.dat
+    │       ├── power_data_0.dat
+    │       ├── power_injection_0.dat
+    │       ├── power_noise_0.dat
+    │       ├── power_reconstruction_t0.dat
+    │       ├── power_residual_t0.dat
+    │       ├── variance_residual_t0.dat
+    │       └── waveform_injection_0.dat
+    ├── seg_0001
+...
+```
+
+To give an idea of size, when ./run/scenarios/quicktest.sh (`steps=10000`) is launched, it ended in 15 min and output size is 126MB.
+
+### Post-processing
+
+TODO. See https://tlittenberg.github.io/ldasoft/html/md_gbmcmc_README.html#autotoc_md30
+
 

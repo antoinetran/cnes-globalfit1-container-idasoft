@@ -1,5 +1,5 @@
 @startuml
-title Case with MBH (search_sources.dat provided) and VGB (ldc_sangria_vgb_list.dat provided)
+title Case with MBH (search_sources.dat provided) and VGB (known-sources = ldc_sangria_vgb_list.dat provided)
 
 start
 :main();

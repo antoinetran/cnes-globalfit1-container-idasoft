@@ -1,38 +1,82 @@
 @startuml
 title UCB diagram ; 2 + N_MBH <= mpid < 2 + N_MBH + N_UCB
 
-|#wheat|GlobalFit.c|
+|#white|GlobalFit.c|
 start
   :// Forked from MPI_Init();
 
-  :alloc_noise_data()
-  alloc_vbmcmc_data()
+  |#white|GalacticBinaryIO.c|
+  :// Reads known-sources file.
+  parse_vb_list();
+
+  |#white|MBHWrapper.c|
+  :// search_sources.dat found
+  // get N_MBH = number of line
+  parse_mbh_args();
+
+  |#white|GalacticBinaryIO.c|
+  :// Parse any UCB 
+  parse();
+
+  |#white|GlobalFit.c|
+  :// Allocates GlobalFit TDI AE structures
+  alloc_gf_data();
+
+  |#white|GalacticBinaryWrapper.c|
+  :// Allocates UCB structures (flags, orbit, chain, data, prior).
+  alloc_gbmcmc_data();
+
+  |#white|VerificationBinaryWrapper.h|
+  :// Allocates VG structures (flags, orbit, chain_vec, data_vec,_prior_vec, trial_vec, model_vec).
+  alloc_vbmcmc_data();
+
+  |#white|MBHWrapper.c|
+  :// Allocates MBH structures (data, het, flags, tdi).
   alloc_mbh_data();
 
+  |#white|NoiseWrapper.c|
+  :alloc_noise_data();
+
+  :// Propagates input TDI to all mpids.
+  share_data();
+
+  :initialize_vbmcmc_sampler();
+
   repeat
+    |#white|GlobalFit.c|
+    :// Receives TDI AE from root process.
+    share_gbmcmc_model();
+
+    |#white|GlobalFit.c|
+    :// Receives TDI AE from root process.
+    share_mbh_model();
+
     :// Remove from TDI AE all found signals from last iteration of UCB VGB MBH
     create_residual();
 
-    |#AliceBlue|VerificationBinaryWrapper.c|
+    |#white|VerificationBinaryWrapper.c|
     :select_vbmcmc_segments();
 
-    |#AliceBlue|GalacticBinaryWrapper.c|
+    |#white|GalacticBinaryWrapper.c|
     :// This is not the same function as for UCB. For VGB only.
     setup_frequency_segment();
 
-    |#wheat|NoiseWrapper.c|
+    |#white|NoiseWrapper.c|
     while (Loop over number of known VGB)
       :// Keep only noise from related frequencies band
       select_noise_segment();
     endwhile
 
-    |#AliceBlue|VerificationBinaryWrapper.c|
+    |#white|VerificationBinaryWrapper.c|
     :// MCMC
     update_vbmcmc_sampler();
 
-  |#wheat|GlobalFit.c|
-  :// Sends TDI AE from UCB to root process, then from root to all non-UCB processes.
-  share_vbmcmc_model();
+    |#white|GlobalFit.c|
+    :// Receives noise model from root process.
+    share_noise_model();
+
+    :// Receives TDI AE from root process.
+    share_vbmcmc_model();
 
   repeat while (GBMCMC steps finished?) is (no)
   ->yes;

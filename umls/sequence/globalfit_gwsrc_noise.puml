@@ -34,39 +34,34 @@ start
   :// Allocates MBH structures (data, het, flags, tdi).
   alloc_mbh_data();
 
-  :// Propagates input TDI to all mpids.
-  share_data();
-
-  :initialize_mbh_sampler();
-
   |#white|NoiseWrapper.c|
   :alloc_noise_data();
 
+  :// Propagates input TDI to all mpids.
+  share_data();
+
+  :initialize_noise_sampler();
+
   repeat
-    :// Remove from TDI AET all found signals from last iteration of UCB VGB MBH
-    create_residual();
-
-    |#white|MBHWrapper.c|
-    :select_mbh_segment();
-
-    :// Keep only noise from related frequencies band
-    select_mbh_noise();
-
-    :// cycle = round ( the max time of all VGB MBH UCB process time) / ( time of one update_mbh_sampler() time );
-
-    while (Loop until done 'cycle' time)
-      :// MCMC
-      update_mbh_sampler();
-    endwhile
-
     |#white|GlobalFit.c|
     :// Receives TDI AE from root process.
     share_gbmcmc_model();
 
-    :// Sends TDI AE from MBH to root process, then from root to all processes (including MBH).
+    |#white|GlobalFit.c|
+    :// Receives TDI AE from root process.
     share_mbh_model();
 
-    :// Receives noise model from root process.
+    :// Remove from TDI AET all found signals from last iteration of UCB VGB MBH
+    create_residual();
+
+    |#white|NoiseWrapper.c|
+    :select_frequency_segment();
+
+    :// MCMC
+    update_noise_sampler();
+
+    |#white|GlobalFit.c|
+    :// Sends noise model to all processes.
     share_noise_model();
 
     :// Receives TDI AE from root process.
