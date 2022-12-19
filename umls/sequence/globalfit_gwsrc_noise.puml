@@ -26,7 +26,7 @@ start
   :// Allocates UCB structures (flags, orbit, chain, data, prior).
   alloc_gbmcmc_data();
 
-  |#white|VerificationBinaryWrapper.h|
+  |#white|VerificationBinaryWrapper.c|
   :// Allocates VG structures (flags, orbit, chain_vec, data_vec,_prior_vec, trial_vec, model_vec).
   alloc_vbmcmc_data();
 
