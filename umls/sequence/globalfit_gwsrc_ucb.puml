@@ -56,7 +56,7 @@ start
       ...
       mpidUcbN_UCB fmin_N_UCB fmax_N_UCB ;
     else (not found)
-      :?;
+      :// With given global fmin as input and some magical formulas, we determine the fmin and fmax for each process;
     endif
     end group
 
@@ -67,13 +67,15 @@ start
     |#white|GalacticBinaryWrapper.c|
     :// cycle = round ( the max time of all VGB MBH UCB process time) / ( time of one update_gbmcmc_sampler() time );
 
-    :exchange_gbmcmc_source_params();
+    :// This exchange is almost like a synchronization point of all UCB processes. Each one of them waits for left and right neighbor to send data.
+    exchange_gbmcmc_source_params();
     if (mpid?) then (even)
       while (Loop until done 'cycle' time)
         :// MCMC
         update_gbmcmc_sampler();
       endwhile
-      :exchange_gbmcmc_source_params();
+      :// This exchange is almost like a synchronization point of all UCB processes. Each one of them waits for left and right neighbor to send data.
+      exchange_gbmcmc_source_params();
     else (odd)
       :exchange_gbmcmc_source_params();
       while (Loop until done 'cycle' time)
