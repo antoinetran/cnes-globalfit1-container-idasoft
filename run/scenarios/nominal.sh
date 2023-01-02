@@ -22,6 +22,6 @@ qsubVar=runningMode=mpiGlobalFit,singularityFile="${sifFile}",inputFile=/work/SC
 ,globalFitMode=${globalFitMode},globalFitProfile=${globalFitProfile}\
 ,vgbFile=$PWD/run/auxiliaryfiles/${globalFitProfile}/ldc_sangria_vgb_list.dat,mbhDirectory=$PWD/run/auxiliaryfiles/${globalFitProfile}/,ucbDirectory=$PWD/run/auxiliaryfiles/${globalFitProfile}/\
 ,steps="${steps}",OMP_NUM_THREADS="${OMP_NUM_THREADS}",chains="${chains}"
-qsub -W block=true -l "${pbsRss}" -l walltime="${walltime}" -v "${qsubVar}" ./run/run_pbs.sh
+qsub -W block=true -l "${pbsRss}" -l walltime="${walltime}" -v "${qsubVar}" "$@" ./run/run_pbs.sh
 
 

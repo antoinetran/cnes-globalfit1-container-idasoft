@@ -10,6 +10,6 @@ pbsRss="select=1:ncpus=4:mpiprocs=4:mem=1gb:os=rh7:generation=g2019"
 walltime=00:05:00
 
 qsubVar=runningMode=mpiHelloRingC,singularityFile="${sifFile}"
-qsub -W block=true -l "${pbsRss}" -l walltime="${walltime}" -v "${qsubVar}" ./run/run_pbs.sh
+qsub -W block=true -l "${pbsRss}" -l walltime="${walltime}" -v "${qsubVar}" "$@" ./run/run_pbs.sh
 
 
