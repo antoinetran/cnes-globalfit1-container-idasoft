@@ -23,6 +23,7 @@ jobs:
         shell: bash
         run: |
           export TAG
+          set -x
           gitRefType="${{ github.ref_type }}"
           gitBranchTag="${{ github.ref_name }}"
           if test "tag" == "${gitRefType}" ; then
