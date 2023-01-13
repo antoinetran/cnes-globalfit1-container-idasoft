@@ -19,6 +19,29 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v3
+      - name: Set TAG
+        shell: bash
+        run: |
+          export TAG
+          gitRefType="${{ github.ref_type }}"
+          gitBranchTag="${{ github.ref_name }}"
+          if test "tag" == "${gitRefType}" ; then
+            echo "Pipeline triggered by a tag ${gitBranchTag}"
+            TAG="${gitBranchTag}"
+          elif test "branch" == "${gitRefType}" ; then
+            echo "Pipeline triggered by a branch ${gitBranchTag}"
+            if test "master" == "${gitBranchTag}" || test "main" == "${gitBranchTag}" ; then
+              # main/master branch are special and called latest.
+              TAG=latest
+            else
+              # Replaces all characters with issues and lowercasing.
+              TAG=$( echo "${gitBranchTag}" | sed -e 's,[^a-zA-Z0-9_.\-],-,g' | tr '[:upper:]' '[:lower:]' )
+            fi
+          else
+            echo "Unknown github.ref_type: ${github.ref_type}." >&2
+            exit 11
+          fi
+          echo TAG set to $TAG
       -
         name: Login to Docker Hub
         uses: docker/login-action@v2
@@ -35,7 +58,7 @@ jobs:
           context: ./container_docker
           file: ./container_docker/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/cnes-lisa-globalfit1-idasoft:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/cnes-lisa-globalfit1-idasoft:$TAG
           # https://depot.dev/blog/docker-layer-caching-in-github-actions
           cache-from: type=gha
           cache-to: type=gha,mode=max
