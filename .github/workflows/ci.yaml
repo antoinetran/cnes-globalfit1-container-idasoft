@@ -35,4 +35,7 @@ jobs:
           file: ./container_docker/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/cnes-lisa-globalfit1-idasoft:latest
+          # https://depot.dev/blog/docker-layer-caching-in-github-actions
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
