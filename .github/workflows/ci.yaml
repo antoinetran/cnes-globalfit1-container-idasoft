@@ -44,7 +44,7 @@ jobs:
           fi
           echo TAG set to $TAG
           # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-environment-variable
-          echo "TAG="${TAG}" >> $GITHUB_ENV
+          echo "TAG=${TAG}" >> $GITHUB_ENV
       - name: Show TAG
         shell: bash
         run: |
