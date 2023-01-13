@@ -69,7 +69,7 @@ ENV PATH="${PATH}:${MPI_DIR}/bin"
 # Gsl 2
 ####
 RUN mkdir /tmp/gsl && cd /tmp/gsl \
-  && wget https://mirror.ibcp.fr/pub/gnu/gsl/gsl-2.7.1.tar.gz \
+  && wget https://ftp.gnu.org/gnu/gsl/gsl-2.7.1.tar.gz \
   && tar xf gsl-* \
   && cd gsl-* \
   && mkdir "${GSL_ROOT_DIR}" -p \

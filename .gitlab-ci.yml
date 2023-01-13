@@ -1,0 +1,77 @@
+variables:
+  IMAGE_NAME: "globalfit_prototyping"
+  # Either empty "" or contains "/" at the end (eg "imageparent/").
+  IMAGE_PARENT: ""
+  ARTIFACT_DIR: "./archive" # must be relative to the build directory - https://gitlab.com/gitlab-org/gitlab-foss/-/issues/15530
+
+
+stages:
+  - build
+  - push
+
+default:
+  before_script:
+    - |
+      export TAG
+      if test -n "${CI_COMMIT_TAG}" ; then
+        echo "Pipeline triggered by a tag ${CI_COMMIT_TAG}"
+        TAG="${CI_COMMIT_TAG}"
+      elif test -n "${CI_COMMIT_BRANCH}" ; then
+        echo "Pipeline triggered by a branch ${CI_COMMIT_BRANCH}"
+        if test "master" == "${CI_COMMIT_BRANCH}" || test "main" == "${CI_COMMIT_BRANCH}" ; then
+          # main/master branch are special and called latest.
+          TAG=latest
+        else
+          # Replaces all characters with issues and lowercasing.
+          TAG=$( echo "${CI_COMMIT_BRANCH}" | sed -e 's,[^a-zA-Z0-9_.\-],-,g' | tr '[:upper:]' '[:lower:]' )
+        fi
+      else
+        echo "Unknown case. CI_COMMIT_TAG and CI_COMMIT_BRANCH are empty!" >&2
+        exit 11
+      fi
+    - echo TAG set to $TAG
+
+build:
+  stage: "build"
+  image:
+    # https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
+    name: gcr.io/kaniko-project/executor:v1.9.1-debug
+    entrypoint: [""]
+  script:
+    - set -x
+    - |
+      mkdir -p "${ARTIFACT_DIR}"
+      mkdir -p /kaniko/.docker
+      echo "{\"auths\":{\"${CI_REGISTRY_IMAGE}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor
+       --context "./container_docker"
+       --dockerfile "./container_docker/Dockerfile"
+       --destination "${CI_REGISTRY_IMAGE}/${IMAGE_PARENT}${IMAGE_NAME}:${TAG}"
+       --no-push
+       --tarPath ${ARTIFACT_DIR}/${IMAGE_NAME}:${TAG}.tar
+       --cache=true
+       --cache-ttl=336h
+       --cache-repo="${CI_REGISTRY_IMAGE}/${IMAGE_PARENT}${IMAGE_NAME}_cache"
+    - ls -al "${ARTIFACT_DIR}"
+  artifacts:
+    name: "archive:${ARTIFACT_NAME}:${CI_JOB_ID}"
+    when: "on_success"
+    expire_in: "6h"
+    paths:
+      - "${ARTIFACT_DIR}/"
+
+push:
+  stage: "push"
+  image:
+    name: gcr.io/go-containerregistry/crane/debug:v0.12.1
+    entrypoint: [""]
+#  only:
+#    - "tags"
+#    - "main"
+  script:
+    - set -x
+    - crane auth login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - crane push "${ARTIFACT_DIR}/${IMAGE_NAME}:${TAG}.tar" "${CI_REGISTRY_IMAGE}/${IMAGE_PARENT}${IMAGE_NAME}:${TAG}"
+  dependencies:
+    - "build"
+
