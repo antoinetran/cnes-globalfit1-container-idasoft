@@ -23,12 +23,12 @@ jobs:
       - name: Get branch name (merge)
         if: github.event_name != 'pull_request'
         shell: bash
-        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
+        run: echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
 
       - name: Get branch name (pull request)
         if: github.event_name == 'pull_request'
         shell: bash
-        run: echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
+        run: echo "BRANCH_NAME=${GITHUB_HEAD_REF}" >> $GITHUB_ENV
 
       - name: Debug
         run: echo ${{ env.BRANCH_NAME }}
@@ -82,7 +82,7 @@ jobs:
           context: ./container_docker
           file: ./container_docker/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/cnes-lisa-globalfit1-idasoft:$TAG
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/cnes-lisa-globalfit1-idasoft:${{ env.TAG }}
           # https://depot.dev/blog/docker-layer-caching-in-github-actions
           cache-from: type=gha
           cache-to: type=gha,mode=max
