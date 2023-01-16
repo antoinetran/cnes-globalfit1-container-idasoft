@@ -496,6 +496,9 @@ void exchange_gbmcmc_source_params(struct GBMCMCData *gbmcmc_data)
             
         }
     }
+    printf("sizeof of exchanged parameters: %d\n", (int) sizeof(params));
+    printf("length of exchanged parameters: %d\n", (int) ( sizeof(params) / sizeof(params[0]) ) );
+    printf("sizeof of double type: %d\n", (int) ( sizeof(params[0]) ) );
     
     /* send to either side */
     int left_neighbor = procID-1;
