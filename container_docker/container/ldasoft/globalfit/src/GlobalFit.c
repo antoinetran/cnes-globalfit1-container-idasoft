@@ -233,12 +233,12 @@ static void share_gbmcmc_model(struct GBMCMCData *gbmcmc_data,
         printf("sizeof of N: %d\n", gf->tdi_ucb->N);
 
         printf("sizeof of TDI A: %d\n", (int) sizeof(gf->tdi_ucb->A));
-        printf("sizeof of TDI A * N: %d\n", (int) (sizeof(gf->tdi_ucb->A) * gf->tdi_ucb->N ) );
+        printf("sizeof of TDI A * 2N: %d\n", (int) (sizeof(gf->tdi_ucb->A) * gf->tdi_ucb->N * 2 ) );
         printf("length of TDI A: %d\n", (int) ( sizeof(gf->tdi_ucb->A) / sizeof(gf->tdi_ucb->A[0]) ) );
         printf("sizeof of double type: %d\n", (int) ( sizeof(gf->tdi_ucb->A[0]) ) );
 
         printf("sizeof of TDI E: %d\n", (int) sizeof(gf->tdi_ucb->E));
-        printf("sizeof of TDI E * N: %d\n", (int) (sizeof(gf->tdi_ucb->E) * gf->tdi_ucb->N ) );
+        printf("sizeof of TDI E * 2N: %d\n", (int) (sizeof(gf->tdi_ucb->E) * gf->tdi_ucb->N * 2 ) );
         printf("length of TDI E: %d\n", (int) ( sizeof(gf->tdi_ucb->E) / sizeof(gf->tdi_ucb->E[0]) ) );
         printf("sizeof of double type: %d\n", (int) ( sizeof(gf->tdi_ucb->E[0]) ) );
 
