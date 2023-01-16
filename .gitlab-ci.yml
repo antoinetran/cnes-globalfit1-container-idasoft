@@ -7,6 +7,7 @@ variables:
 
 stages:
   - build
+  - quality
   - push
 
 default:
@@ -59,6 +60,10 @@ build:
     expire_in: "6h"
     paths:
       - "${ARTIFACT_DIR}/"
+
+quality:
+  include:
+    remote: "https://gitlab.com/guided-explorations/code-metrics/ci-cd-extension-scc/-/raw/master/ci-cd-extension-scc.yml?inline=false"
 
 push:
   stage: "push"
