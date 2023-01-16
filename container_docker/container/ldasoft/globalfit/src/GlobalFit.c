@@ -187,8 +187,7 @@ static void share_gbmcmc_model(struct GBMCMCData *gbmcmc_data,
         MPI_Send(&N, 1, MPI_INT, root, 1, MPI_COMM_WORLD);
         MPI_Send(model->tdi[0]->A, N, MPI_DOUBLE, root, 2, MPI_COMM_WORLD);
         MPI_Send(model->tdi[0]->E, N, MPI_DOUBLE, root, 3, MPI_COMM_WORLD);
-        
-        sizeof(
+
     }
     
     if(procID==root)
