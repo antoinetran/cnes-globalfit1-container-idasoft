@@ -1,6 +1,5 @@
 #!/bin/sh
 
-. ~/set_proxy.sh
 sifFile=/work/SC/lisa/${USER}/cnes-lisa-globalfit1-idasoft-hpc.sif
 
 # select=Number of node

@@ -1,6 +1,5 @@
 #!/bin/sh
 
-. ~/set_proxy.sh
 sifFile=/work/SC/lisa/${USER}/cnes-lisa-globalfit1-idasoft-hpc.sif
 
 # Default is 100000. Estimation time (depends on the ressources): default steps takes around a week. 10000 steps takes around 30min.
