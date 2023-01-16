@@ -1,0 +1,88 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - "main"
+      - "master"
+      - "releases/**"
+    tags:
+      - "*"
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Get branch name (merge)
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+
+      - name: Get branch name (pull request)
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: echo "BRANCH_NAME=${GITHUB_HEAD_REF}" >> $GITHUB_ENV
+
+      - name: Debug
+        run: echo ${{ env.BRANCH_NAME }}
+
+      - name: Set TAG
+        shell: bash
+        run: |
+          export TAG
+          set -x
+          gitRefType="${{ github.ref_type }}"
+          if test "tag" == "${gitRefType}" ; then
+            gitTag="${{ github.ref_name }}"
+            echo "Pipeline triggered by a tag ${gitTag}"
+            TAG="${gitTag}"
+          elif test "branch" == "${gitRefType}" ; then
+            gitBranch="${BRANCH_NAME}"
+            echo "Pipeline triggered by a branch ${gitBranch}"
+            if test "master" == "${gitBranch}" || test "main" == "${gitBranch}" ; then
+              # main/master branch are special and called latest.
+              TAG=latest
+            else
+              # Replaces all characters with issues and lowercasing.
+              TAG=$( echo "${gitBranch}" | sed -e 's,[^a-zA-Z0-9_.\-],-,g' | tr '[:upper:]' '[:lower:]' )
+            fi
+          else
+            echo "Unknown github.ref_type: ${github.ref_type}." >&2
+            exit 11
+          fi
+          echo TAG set to $TAG
+          # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-environment-variable
+          echo "TAG=${TAG}" >> $GITHUB_ENV
+      - name: Show TAG
+        shell: bash
+        run: |
+          set -x
+          echo "TAG: ${TAG}"
+          env | grep TAG
+      -
+        name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      -
+        name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: ./container_docker
+          file: ./container_docker/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/cnes-lisa-globalfit1-idasoft:${{ env.TAG }}
+          # https://depot.dev/blog/docker-layer-caching-in-github-actions
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
