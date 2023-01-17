@@ -3,10 +3,12 @@ variables:
   # Either empty "" or contains "/" at the end (eg "imageparent/").
   IMAGE_PARENT: ""
   ARTIFACT_DIR: "./archive" # must be relative to the build directory - https://gitlab.com/gitlab-org/gitlab-foss/-/issues/15530
-
+  # For metrics. Git repositories separated by "|".
+  repo_list_to_count: "https://github.com/tlittenberg/ldasoft"
 
 stages:
   - build
+  - count-lines-of-code
   - push
 
 default:
@@ -59,6 +61,24 @@ build:
     expire_in: "6h"
     paths:
       - "${ARTIFACT_DIR}/"
+
+include:
+  remote: "https://gitlab.com/guided-explorations/code-metrics/ci-cd-extension-scc/-/raw/master/ci-cd-extension-scc.yml"
+count-lines-of-code:
+  # Cleans because we only want metrics to the nested git clone.
+  before_script:
+    - |
+      pwd
+      id
+      ls -al
+      find
+      echo "Cleaning everyhing but ./archive for SCC of ${repo_list_to_count}..."
+      find -not -path ./archive -type f -delete
+      find -not -path ./archive -type d -delete
+      echo "Clean done."
+      find
+  stage: count-lines-of-code
+  extends: .ci-cd-extension-scc
 
 push:
   stage: "push"
