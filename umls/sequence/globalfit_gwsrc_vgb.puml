@@ -37,9 +37,11 @@ start
   |#white|NoiseWrapper.c|
   :alloc_noise_data();
 
+  |#white|GlobalFit.c|
   :// Propagates input TDI to all mpids.
   share_data();
 
+  |#white|VerificationBinaryWrapper.c|
   :initialize_vbmcmc_sampler();
 
   repeat
@@ -51,7 +53,7 @@ start
     :// Receives TDI AE from root process.
     share_mbh_model();
 
-    :// Remove from TDI AE all found signals from last iteration of UCB VGB MBH
+    :// Remove from TDI AE all found signals from last iteration of UCB MBH generated signals
     create_residual();
 
     |#white|VerificationBinaryWrapper.c|

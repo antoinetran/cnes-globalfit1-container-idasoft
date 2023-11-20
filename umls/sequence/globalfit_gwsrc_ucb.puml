@@ -37,13 +37,16 @@ start
   |#white|NoiseWrapper.c|
   :alloc_noise_data();
 
+  |#white|GlobalFit.c|
   :// Propagates input TDI to all mpids.
   share_data();
 
+  |#white|GalacticBinaryWrapper.c|
   :initialize_gbmcmc_sampler();
 
   repeat
-    :// Remove from TDI AE all found signals from last iteration of UCB VGB MBH
+    |#white|GlobalFit.c|
+    :// Remove from TDI AE all found signals from last iteration of VGB MBH generated signals
     create_residual();
 
     |#white|GalacticBinaryWrapper.c|

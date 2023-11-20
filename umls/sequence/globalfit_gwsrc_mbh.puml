@@ -43,7 +43,8 @@ start
   :alloc_noise_data();
 
   repeat
-    :// Remove from TDI AET all found signals from last iteration of UCB VGB MBH
+    |#white|GlobalFit.c|
+    :// Remove from TDI AET all found signals from last iteration of UCB VGB generated signals
     create_residual();
 
     |#white|MBHWrapper.c|
